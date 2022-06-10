@@ -17,6 +17,7 @@ on:
         required: true
       AWS_S3_BUCKET_NAME:
         required: true
+        type: string
       AWS_DISTRIBUTION_ID:
         required: true
       PRODUCTION_DOMAIN:
