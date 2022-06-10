@@ -20,7 +20,7 @@ on:
       aws_distribution_id:
         required: true
       production_domain:
-        required: true
+        required: false
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
