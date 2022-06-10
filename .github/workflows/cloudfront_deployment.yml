@@ -1,4 +1,4 @@
-name: CloudFront/S3 Deployment
+name: Reusable Deployment
 on:
   workflow_call:
     inputs:
@@ -9,25 +9,29 @@ on:
         required: true
         type: string
     secrets:
-      AWS_ACCESS_KEY_ID:
+      aws_access_key_id:
         required: true
-      AWS_SECRET_ACCESS_KEY:
+      aws_secret_access_key:
         required: true
-      AWS_DEFAULT_REGION:
+      aws_default_region:
         required: true
-      AWS_S3_BUCKET_NAME:
+      aws_s3_bucket_name:
         required: true
-      AWS_DISTRIBUTION_ID:
+      aws_distribution_id:
         required: true
-      PRODUCTION_DOMAIN:
+      production_domain:
         required: true
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+  AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
 
 jobs:
   build:
+    name: S3 Deployment
     runs-on: ubuntu-latest
     steps:
-      - name: TEST
-        run: echo ${{ secrets.AWS_S3_BUCKET_NAME }} ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install Node.js
@@ -44,10 +48,10 @@ jobs:
       - name: Builder
         run: pnpm run build
         env:
-          PRODUCTION_DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
+          PRODUCTION_DOMAIN: ${{ secrets.production_domain }}
       - name: Install AWS CLI
         uses: shinyinc/action-aws-cli@v1.2
       - name: Deploy to S3
-        run: aws s3 sync dist s3://${{ secrets.AWS_S3_BUCKET_NAME }}/${{ inputs.path }}
+        run: aws s3 sync dist s3://${{ secrets.aws_s3_bucket_name }}/${{ inputs.path }}
       - name: CloudFront Validation
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths ${{ inputs.file }}
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.aws_distribution_id }} --paths ${{ inputs.file }}
