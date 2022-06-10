@@ -17,7 +17,6 @@ on:
         required: true
       AWS_S3_BUCKET_NAME:
         required: true
-        type: string
       AWS_DISTRIBUTION_ID:
         required: true
       PRODUCTION_DOMAIN:
@@ -27,6 +26,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: TEST
+        run: echo ${{ AWS_S3_BUCKET_NAME }} ${{ AWS_SECRET_ACCESS_KEY }}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install Node.js
