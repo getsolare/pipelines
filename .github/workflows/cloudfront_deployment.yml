@@ -1,0 +1,51 @@
+name: CloudFront/S3 Deployment
+on:
+  workflow_call:
+    inputs:
+      path:
+        required: true
+        type: string
+      file:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_DEFAULT_REGION:
+        required: true
+      AWS_S3_BUCKET_NAME:
+        required: true
+      AWS_DISTRIBUTION_ID:
+        required: true
+      PRODUCTION_DOMAIN:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - uses: pnpm/action-setup@v2.0.1
+        name: pnpm Install
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: true
+      - name: Builder
+        run: pnpm run build
+        env:
+          PRODUCTION_DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
+      - name: Install AWS CLI
+        uses: shinyinc/action-aws-cli@v1.2
+      - name: Deploy to S3
+        run: aws s3 sync dist s3://${{ secrets.AWS_S3_BUCKET_NAME }}/${{ inputs.path }}
+      - name: CloudFront Validation
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths ${{ inputs.file }}
