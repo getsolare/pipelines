@@ -8,6 +8,9 @@ on:
       file:
         required: true
         type: string
+      build_folder:
+        required: true
+        type: string
     secrets:
       aws_access_key_id:
         required: true
@@ -52,6 +55,6 @@ jobs:
       - name: Install AWS CLI
         uses: shinyinc/action-aws-cli@v1.2
       - name: Deploy to S3
-        run: aws s3 sync dist s3://${{ secrets.aws_s3_bucket_name }}/${{ inputs.path }}
+        run: aws s3 sync ${{ inputs.build_folder }} s3://${{ secrets.aws_s3_bucket_name }}/${{ inputs.path }}
       - name: CloudFront Validation
         run: aws cloudfront create-invalidation --distribution-id ${{ secrets.aws_distribution_id }} --paths ${{ inputs.file }}
